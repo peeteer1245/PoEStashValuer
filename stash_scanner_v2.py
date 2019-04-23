@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+
+
+##############################################################################################################
+# Set your personal preferences here.
+writeFile = False
+fileName = "chaos_report.csv"  # <------------------------------------------------- maybe change this
+
+minimumChaosValue = 2  # <--------------------------------------------------------- maybe change this
+
+league = "set me!"  # <------------------------------------------------------------ change this
+accountName = "set me!"  # <------------------------------------------------------- change this
+poessid = "set me!"  # <----------------------------------------------------------- change this
+# you can check the link below, if you don't know where to get the poesessid
+# https://github.com/Stickymaddness/Procurement/wiki/SessionID
+
+# here you can get a list of all leagues (look for 'id: "')
+# http://api.pathofexile.com/leagues
+##############################################################################################################
+
+### start of code ###
+
+
 import multiprocessing
 import os
 import time
@@ -8,10 +30,6 @@ try:
 except ImportError:
     print("you need the requests library for this script to work")
     quit()
-
-########################################################
-# remember to enter your data in lines 158 to 162
-########################################################
 
 
 def json_downloader(url):
@@ -153,23 +171,13 @@ def poe_get_data(userName, league, poesessid):
 
 
 if __name__ == "__main__":
+    cookie = {"POESESSID": poessid}
     ts1 = time.time()
-    writeFile = False
-    league = "set me!"  # <------------------------------------------------------------ change this
-    fileName = "chaos_report.csv"  # <------------------------------------------------- maybe change this
-    minimumChaosValue = 2  # <--------------------------------------------------------- maybe change this
-    accountName = "set me!"  # <------------------------------------------------------- change this
-    cookie = {"POESESSID": "set me!"}  # <--------------------------------------------- change this
-    # you can check the link below, if you don't know where to get the poesessid
-    # https://github.com/Stickymaddness/Procurement/wiki/SessionID
-
-    # here you can get a list of all leagues (look for 'id: "')
-    # http://api.pathofexile.com/leagues
 
     if league == "set me!" or \
             accountName == "set me!" or \
             cookie["POESESSID"] == "set me!":
-        print("please enter your data in lines:\n158 to 162")
+        print("please enter your data at the start of this file")
         input("press enter to quit")
 
     if writeFile:
