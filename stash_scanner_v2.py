@@ -39,7 +39,7 @@ def json_downloader(url):
 
 
 def ninja_get_data(league):
-    baseURL = "https://poe.ninja/api/data/{}Overview?league={}&type="
+    baseURL = "https://poe.ninja/api/data/{}Overview?league={}&type={}"
     ninjaCurrencyTypes = ["Fragment", "Currency"]
     ninjaTypes = [
         "Fossil",
@@ -58,9 +58,9 @@ def ninja_get_data(league):
 
     urls_to_download = []
     for itemType in ninjaTypes:
-        urls_to_download.append(baseURL.format("Item", league) + itemType)
+        urls_to_download.append(baseURL.format("Item", league, itemType))
     for currencyType in ninjaCurrencyTypes:
-        urls_to_download.append(baseURL.format("Currency", league) + currencyType)
+        urls_to_download.append(baseURL.format("Currency", league, currencyType))
 
     dataCollection = []
     with multiprocessing.Pool(processes=len(urls_to_download)) as pool:
