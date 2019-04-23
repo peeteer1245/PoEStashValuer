@@ -14,8 +14,7 @@ poessid = "set me!"  # <--------------------------------------------------------
 # you can check the link below, if you don't know where to get the poesessid
 # https://github.com/Stickymaddness/Procurement/wiki/SessionID
 
-# here you can get a list of all leagues (look for 'id: "')
-# http://api.pathofexile.com/leagues
+# enter a "?" in league, and execute the script, if you want a list of all valid leagues
 ##############################################################################################################
 
 ### start of code ###
@@ -170,9 +169,36 @@ def poe_get_data(userName, league, poesessid):
     return dataList
 
 
+def print_valid_leagues():
+    # Determines valid league by trial-and-error -ing against the poe.ninja API
+
+    print("Getting valid leagues")
+
+    poeApi = "http://api.pathofexile.com/leagues"
+    ninjaApi = "https://poe.ninja/api/data/ItemOverview?league={}&type=Fossil"
+
+    poeApiResponse = requests.get(poeApi)
+    poeLeagues = [league["id"] for league in poeApiResponse.json()]
+
+    matches = []
+    for leagueName in poeLeagues:
+        ninjaResponse = requests.get(ninjaApi.format(leagueName))
+        if ninjaResponse.status_code == 200:
+            matches.append(leagueName)
+
+    print("The following leagues are valid:")
+    [print(match) for match in matches]
+
+
+
 if __name__ == "__main__":
     cookie = {"POESESSID": poessid}
     ts1 = time.time()
+
+    if league == "?":
+        print_valid_leagues()
+        input("press enter to quit")
+        quit(0)
 
     if league == "set me!" or \
             accountName == "set me!" or \
