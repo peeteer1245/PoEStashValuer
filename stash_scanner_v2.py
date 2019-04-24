@@ -133,7 +133,7 @@ def poe_get_data(userName, league, poesessid):
     if len(toDownload) < 44:
         print("This should not take long.")
     else:
-        totalSleep = round((len(toDownload) + 1) / 45 * 60, 0)
+        totalSleep = int((len(toDownload) + 1) / 45 * 60 - 60)
         print("This is going to take at least {} seconds".format(totalSleep))
 
     dataList = []
@@ -204,12 +204,10 @@ if __name__ == "__main__":
             cookie["POESESSID"] == "set me!":
         print("please enter your data at the start of this file")
         input("press enter to quit")
+        quit(1)
 
     if writeFile:
         filePath = os.path.join(os.getcwd(), fileName)
-        if os.path.isfile(filePath):
-            input(fileName + " already exists.\npress enter to quit")
-            quit()
 
     print("downloading")
 
@@ -230,7 +228,7 @@ if __name__ == "__main__":
         except KeyError:
             pass
 
-    csvData.sort(key=lambda x: int(x[1]))  # for some reason also sorts by tabname
+    csvData.sort(key=lambda x: x[1])
     csvData.reverse()
     csvData.insert(0, ["total",    0.0,              "yes"])
     csvData.insert(0, ["itemName", "value in chaos", "tabName"])
@@ -262,4 +260,8 @@ if __name__ == "__main__":
 
     print()
     print("this took {} seconds".format(round(time.time() - ts1, 2)))
+
+    if not writeFile:
+        input("press enter to quit")
+
     quit()
