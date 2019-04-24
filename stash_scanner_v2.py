@@ -190,7 +190,6 @@ def print_valid_leagues():
     [print(match) for match in matches]
 
 
-
 if __name__ == "__main__":
     cookie = {"POESESSID": poessid}
     ts1 = time.time()
@@ -254,6 +253,7 @@ if __name__ == "__main__":
                 longest_column_length[column] = len(str(row[column]))
     for i in range(3):
         longest_column_length[i] += 2
+
     print()
     for column in csvData:
         for i in range(3):
