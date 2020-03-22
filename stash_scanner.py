@@ -224,20 +224,20 @@ if __name__ == "__main__":
                 csvData.append([
                     item[0],                                 # item name
                     round(ninjaData[item[0]] * item[2], 2),  # the stacks total worth
-                    item[1],                                 # the StashTab that it is in
                     item[2],                                 # how many of this is stacked
-                    ninjaData[item[0]]                       # worth of each individual item
+                    ninjaData[item[0]],                      # worth of each individual item
+                    item[1],                                 # the StashTab that it is in
                     ])
         except KeyError:
             pass
 
     if sortByUnitPrice:
-        csvData.sort(key=lambda x: x[4])
+        csvData.sort(key=lambda x: x[3])
     else:
         csvData.sort(key=lambda x: x[1])
     csvData.reverse()
-    csvData.insert(0, ["total",    0.0,              "",     ""])
-    csvData.insert(0, ["itemName", "value in chaos", "tabName", "stackSize"])
+    csvData.insert(0, ["total",    0.0,              "",          "",                 ""])
+    csvData.insert(0, ["itemName", "value in chaos", "stackSize", "individual value", "tabName"])
     for i in range(2, len(csvData)):
         csvData[1][1] += csvData[i][1]  # calculating total value
     csvData[1][1] = round(csvData[1][1], 2)  # rounding total value to 2 decimal points
@@ -246,21 +246,21 @@ if __name__ == "__main__":
     if writeFile:
         with open(fileName, "w") as fileOut:
             for line in csvData:
-                fileOut.write("\"{0}\";\"{1}\";\"{2}\";\"{3}\"\n".format(line[0], line[1], line[2], line[3]))
+                fileOut.write("\"{0}\";\"{1}\";\"{2}\";\"{3}\";\"{4}\"\n".format(line[0], line[1], line[2], line[3], line[4]))
             fileOut.close()
 
     # printing the csv table to the terminal
-    longest_column_length = [0, 0, 0, 0]
+    longest_column_length = [0, 0, 0, 0, 0]
     for row in csvData:
-        for column in range(4):
+        for column in range(5):
             if len(str(row[column])) > longest_column_length[column]:
                 longest_column_length[column] = len(str(row[column]))
-    for i in range(4):
+    for i in range(5):
         longest_column_length[i] += 2
 
     print()
     for row in csvData:
-        for i in range(4):
+        for i in range(5):
             print("{0:{width}}".format(str(row[i]), width=longest_column_length[i]), end="")
         print()
 
