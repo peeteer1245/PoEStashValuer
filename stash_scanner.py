@@ -54,7 +54,13 @@ def ninja_get_data(league):
         "UniqueArmour",
         "UniqueAccessory",
         "UniqueFlask",
-        "UniqueJewel"
+        "UniqueJewel",
+        "DeliriumOrb",
+        "Incubator",
+        "UniqueMap",
+        "Map",
+        "Vial",
+        "Oil"
     ]
 
     urls_to_download = []
@@ -96,6 +102,11 @@ def poe_stash_downloader(infoList):
         if "typeLine" in item.keys():
             if "stackSize" in item.keys():
                 itemList.append([item["typeLine"], stashName, item["stackSize"]])
+            elif "properties" in item.keys() and "name" in item["properties"][0].keys() and item["properties"][0]["name"] == "Map Tier":  # check if the item is a map
+                if item["frameType"] == 3:
+                    itemList.append([item["name"], stashName, 1])  # unique map
+                else:
+                    itemList.append([item["typeLine"], stashName, 1])  # non unique map
             else:
                 itemList.append([item["typeLine"], stashName, 1])
         else:
