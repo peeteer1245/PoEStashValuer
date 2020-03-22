@@ -8,6 +8,8 @@ fileName = "chaos_report.csv"  # <----------------------------------------------
 
 minimumChaosValue = 2  # <--------------------------------------------------------- maybe change this
 
+sortByUnitPrice = False  # <------------------------------------------------------- maybe change this
+
 league = "set me!"  # <------------------------------------------------------------ change this
 accountName = "set me!"  # <------------------------------------------------------- change this
 poessid = "set me!"  # <----------------------------------------------------------- change this
@@ -221,14 +223,18 @@ if __name__ == "__main__":
             if ninjaData[item[0]] * item[2] >= minimumChaosValue:
                 csvData.append([
                     item[0],                                 # item name
-                    round(ninjaData[item[0]] * item[2], 2),  # it's price
+                    round(ninjaData[item[0]] * item[2], 2),  # the stacks total worth
                     item[1],                                 # the StashTab that it is in
-                    item[2]                                  # how many of this is stacked
+                    item[2],                                 # how many of this is stacked
+                    ninjaData[item[0]]                       # worth of each individual item
                     ])
         except KeyError:
             pass
 
-    csvData.sort(key=lambda x: x[1])
+    if sortByUnitPrice:
+        csvData.sort(key=lambda x: x[4])
+    else:
+        csvData.sort(key=lambda x: x[1])
     csvData.reverse()
     csvData.insert(0, ["total",    0.0,              "",     ""])
     csvData.insert(0, ["itemName", "value in chaos", "tabName", "stackSize"])
