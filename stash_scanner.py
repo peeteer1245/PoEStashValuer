@@ -93,16 +93,15 @@ def poe_stash_downloader(infoList):
     for item in r.json()["items"]:
         if "typeLine" in item.keys():
             if "stackSize" in item.keys():
-                for i in range(item["stackSize"]):
-                    itemList.append([item["typeLine"], stashName])
+                itemList.append([item["typeLine"], stashName, item["stackSize"]])
             else:
-                itemList.append([item["typeLine"], stashName])
+                itemList.append([item["typeLine"], stashName, 1])
         else:
-            itemList.append([item["name"], stashName])
+            itemList.append([item["name"], stashName, 1])
 
     if len(itemList) == 0:
-        itemList.append(["Literally", stashName])
-        itemList.append(["Empty", stashName])
+        itemList.append(["Literally", stashName, -1])
+        itemList.append(["Empty", stashName, -1])
     return itemList
 
 
@@ -219,43 +218,44 @@ if __name__ == "__main__":
     csvData = []
     for item in poeData:
         try:
-            if ninjaData[item[0]] >= minimumChaosValue:
+            if ninjaData[item[0]] * item[2] >= minimumChaosValue:
                 csvData.append([
-                    item[0],                # item name
-                    ninjaData[item[0]],     # it's price
-                    item[1]                 # the StashTab that it is in
+                    item[0],                                 # item name
+                    round(ninjaData[item[0]] * item[2], 2),  # it's price
+                    item[1],                                 # the StashTab that it is in
+                    item[2]                                  # how many of this is stacked
                     ])
         except KeyError:
             pass
 
     csvData.sort(key=lambda x: x[1])
     csvData.reverse()
-    csvData.insert(0, ["total",    0.0,              "yes"])
-    csvData.insert(0, ["itemName", "value in chaos", "tabName"])
+    csvData.insert(0, ["total",    0.0,              "",     ""])
+    csvData.insert(0, ["itemName", "value in chaos", "tabName", "stackSize"])
     for i in range(2, len(csvData)):
-        csvData[1][1] += csvData[i][1]
-    csvData[1][1] = round(csvData[1][1], 2)
+        csvData[1][1] += csvData[i][1]  # calculating total value
+    csvData[1][1] = round(csvData[1][1], 2)  # rounding total value to 2 decimal points
 
     # writing the csv file
     if writeFile:
         with open(fileName, "w") as fileOut:
             for line in csvData:
-                fileOut.write("\"{0}\";\"{1}\";\"{2}\"\n".format(line[0], line[1], line[2]))
+                fileOut.write("\"{0}\";\"{1}\";\"{2}\";\"{3}\"\n".format(line[0], line[1], line[2], line[3]))
             fileOut.close()
 
     # printing the csv table to the terminal
-    longest_column_length = [0, 0, 0]
+    longest_column_length = [0, 0, 0, 0]
     for row in csvData:
-        for column in range(3):
+        for column in range(4):
             if len(str(row[column])) > longest_column_length[column]:
                 longest_column_length[column] = len(str(row[column]))
-    for i in range(3):
+    for i in range(4):
         longest_column_length[i] += 2
 
     print()
-    for column in csvData:
-        for i in range(3):
-            print("{0:{width}}".format(str(column[i]), width=longest_column_length[i]), end="")
+    for row in csvData:
+        for i in range(4):
+            print("{0:{width}}".format(str(row[i]), width=longest_column_length[i]), end="")
         print()
 
     print()
