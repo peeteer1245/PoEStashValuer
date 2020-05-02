@@ -107,6 +107,8 @@ def poe_stash_downloader(infoList):
                     itemList.append([item["name"], stashName, 1])  # unique map
                 else:
                     itemList.append([item["typeLine"], stashName, 1])  # non unique map
+            elif item["frameType"] > 2:
+                itemList.append([item["name"], stashName, 1])
             else:
                 itemList.append([item["typeLine"], stashName, 1])
         else:
