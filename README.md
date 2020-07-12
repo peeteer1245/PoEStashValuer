@@ -3,25 +3,31 @@ Compares your stash contents with items on poe.ninja to give a rough estimate, a
 
 :warning: Before you first execute this you should change the marked values so that your stash can be read.
 
-## Currently supported item types
-- `DeliriumOrb`
-- `DivinationCard`
-- `Essence`
-- `Fossil`
-- `Incubator`
-- `Map`
-- `Oil`
-- `Prophecy`
-- `Resonator`
-- `Scarab`
-- `UniqueAccessory`
-- `UniqueArmour`
-- `UniqueFlask`
-- `UniqueJewel`
-- `UniqueJewel`
-- `UniqueMap`
-- `UniqueWeapon`
-- `Vial`
+## Currently Whitelisted poe.ninja types
+`DeliriumOrb`
+`DivinationCard`
+`Essence`
+`Fossil`
+`Incubator`
+`Map`
+`Oil`
+`Prophecy`
+`Resonator`
+`Scarab`
+`Seed`
+`UniqueAccessory`
+`UniqueArmour`
+`UniqueFlask`
+`UniqueJewel`
+`UniqueJewel`
+`UniqueMap`
+`UniqueWeapon`
+`Vial`
+
+## What cannot be included in the summary?
+- 5/6 Link items will not be included (except uniques)
+- Magic Maps will not be included
+- Maps inside a Map Stash Tab cannot be included
 
 ## TODO
 - support all stash tabs
