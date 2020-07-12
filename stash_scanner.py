@@ -12,7 +12,7 @@ sortByUnitPrice = False  # <----------------------------------------------------
 
 league = "set me!"  # <------------------------------------------------------------ change this
 accountName = "set me!"  # <------------------------------------------------------- change this
-poessid = "set me!"  # <----------------------------------------------------------- change this
+poesessid = "set me!"  # <--------------------------------------------------------- change this
 # you can check the link below, if you don't know where to get the poesessid
 # https://github.com/Stickymaddness/Procurement/wiki/SessionID
 
@@ -72,67 +72,40 @@ def ninja_get_data(league):
     dataCollection = []
     with multiprocessing.Pool(processes=len(urls_to_download)) as pool:
         for itemCategoryList in pool.imap_unordered(json_downloader, urls_to_download):
-            for itemDictionary in itemCategoryList["lines"]:
-                dataCollection.append(itemDictionary)
+            dataCollection.extend(itemCategoryList["lines"])
 
-    dataList = {}
-    for itemDictionary in dataCollection:
-        try:
-            if itemDictionary["links"] == 0 or \
-               itemDictionary["name"] == "Tabula Rasa" or \
-               itemDictionary["name"] == "Oni-Goroshi":
-                dataList[itemDictionary["name"]] = itemDictionary["chaosValue"]
-        except KeyError:
-            dataList[itemDictionary["currencyTypeName"]] = itemDictionary["chaosEquivalent"]
-    return dataList
+    return dataCollection
 
 
 def poe_stash_downloader(infoList):
     url = infoList[0]
-    poesessid = infoList[1]
-    stashType = infoList[2]
-    stashName = infoList[3]
+    cookie = infoList[1]
 
-    itemList = []
-    r = requests.get(url, cookies=poesessid)
+    r = requests.get(url, cookies=cookie)
 
     r.raise_for_status()
 
-    for item in r.json()["items"]:
-        if "typeLine" in item.keys():
-            if "stackSize" in item.keys():
-                itemList.append([item["typeLine"], stashName, item["stackSize"]])
-            elif "properties" in item.keys() and "name" in item["properties"][0].keys() and item["properties"][0]["name"] == "Map Tier":  # check if the item is a map
-                if item["frameType"] == 3:
-                    itemList.append([item["name"], stashName, 1])  # unique map
-                else:
-                    itemList.append([item["typeLine"], stashName, 1])  # non unique map
-            elif item["frameType"] > 2:
-                itemList.append([item["name"], stashName, 1])
-            else:
-                itemList.append([item["typeLine"], stashName, 1])
-        else:
-            itemList.append([item["name"], stashName, 1])
-
-    if len(itemList) == 0:
-        itemList.append(["Literally", stashName, -1])
-        itemList.append(["Empty", stashName, -1])
-    return itemList
+    return r.json()["items"]
 
 
 def poe_get_data(userName, league, poesessid):
     baseURL = "https://www.pathofexile.com/character-window/get-stash-items?league={}&accountName={}&tabs={}"
     addinURL = "&tabIndex="
-    stashTabWhiteList = ["DivinationCardStash",
-                         "PremiumStash",
-                         "QuadStash",
-                         "NormalStash",
-                         "CurrencyStash",
-                         "FragmentStash",
-                         "EssenceStash"]
+    stashTabWhiteList = [
+        "DivinationCardStash",
+        "PremiumStash",
+        "QuadStash",
+        "NormalStash",
+        "CurrencyStash",
+        "FragmentStash",
+        "EssenceStash"
+    ]
+
+    cookie = {"POESESSID": poesessid}
 
     probeURL = baseURL.format(league, userName, 1)
-    probe = requests.get(probeURL, cookies=poesessid)
+
+    probe = requests.get(probeURL, cookies=cookie)
     probe.raise_for_status()
 
     toDownload = []
@@ -147,10 +120,12 @@ def poe_get_data(userName, league, poesessid):
     if len(toDownload) < 44:
         print("This should not take long.")
     else:
-        totalSleep = int((len(toDownload) + 1) / 45 * 60 - 60)
+        # for every 45 tabs you have, you have to wait 60 seconds
+        totalSleep = int((len(toDownload) + 1) / 45) * 60
         print("This is going to take at least {} seconds".format(totalSleep))
 
-    dataList = []
+    dataList = [probe.json()["tabs"]]
+
     with multiprocessing.Pool(processes=45) as pool:
         downloadadTabsCounter = 0  # TODO: think of better names
         while True:
@@ -164,13 +139,10 @@ def poe_get_data(userName, league, poesessid):
             tabsForThePool = []  # TODO: think of better names
             for i in range(downloadadTabsCounter, downloadadTabsCounter + tabsToDownloadCounter):
                 url = baseURL.format(league, userName, 0) + addinURL + str(toDownload[i][1])
-                tabsForThePool.append([url, poesessid, toDownload[i][2], toDownload[i][0]])
+                tabsForThePool.append([url, cookie])
 
-            for itemList in pool.imap_unordered(poe_stash_downloader, tabsForThePool):
-                for item in itemList:
-                    if item[0] != "Literally" or \
-                            item[0] != "Empty":
-                        dataList.append(item)
+            for items in pool.imap_unordered(poe_stash_downloader, tabsForThePool):
+                dataList.extend(items)
             downloadadTabsCounter += tabsToDownloadCounter
 
             if downloadadTabsCounter < len(toDownload):
@@ -181,6 +153,155 @@ def poe_get_data(userName, league, poesessid):
                 break
 
     return dataList
+
+
+def check_links(item):
+    if "sockets" in item \
+            and len(item["sockets"]) > 4:
+        largestLink = 1
+        linkCounter = 1
+        lastSocketGroup = 0
+        for socket in item["sockets"]:
+            if socket["group"] == lastSocketGroup:
+                linkCounter += 1
+                largestLink = linkCounter
+            else:
+                linkCounter = 1
+        if largestLink > 4:
+            return largestLink
+        else:
+            return 0
+    else:
+        return 0
+
+
+def compare_poe_with_ninja_data(poeData, ninjaData):
+    poeTabInfos = poeData[0]
+    poeData.pop(0)
+
+    # creating a map to ease the process of getting the proper name of a stashtab
+    poeTabNameMap = {}
+    for tab in poeTabInfos:
+        poeTabNameMap["Stash" + str(tab["i"]+1)] = tab["n"]
+
+    csvData = []
+    for item in poeData:
+        # Map Fragments and Maps (non maps get filtered)
+        if 0 <= item["frameType"] <= 2:
+            # stackable Map Fragments
+            for ninjaItem in ninjaData:
+                if "stackSize" in item \
+                        or ("descrText" in item and "Map Device" in item["descrText"]):
+                    if "currencyTypeName" in ninjaItem \
+                            and item["typeLine"] == ninjaItem["currencyTypeName"]:
+                        amount = item["stackSize"] if "stackSize" in item else 1
+                        csvData.append(
+                            [
+                                item["typeLine"],
+                                round(ninjaItem["chaosEquivalent"] * amount, 2),
+                                amount,
+                                ninjaItem["chaosEquivalent"],
+                                poeTabNameMap[item["inventoryId"]]
+                            ]
+                        )
+                        break
+                # Map Fragments and Maps basetypes
+                elif "properties" in item \
+                        and "name" in item["properties"] \
+                        and item["properties"]["name"] == "Map Tier":
+                    if "name" in ninjaItem \
+                            and item["typeLine"] == ninjaItem["name"]:
+                        csvData.append(
+                            [
+                                item["typeLine"],
+                                ninjaItem["chaosValue"],
+                                1,
+                                ninjaItem["chaosValue"],
+                                poeTabNameMap[item["inventoryId"]]
+                            ]
+                        )
+                        break
+
+        # Unique items
+        elif item["frameType"] == 3:
+            for ninjaItem in ninjaData:
+                if "name" in ninjaItem \
+                        and item["name"] == ninjaItem["name"] \
+                        and item["typeLine"] == ninjaItem["baseType"] \
+                        and ninjaItem["itemClass"] == 3 \
+                        and check_links(item) == ninjaItem["links"]:
+                    csvData.append(
+                        [
+                            item["name"],
+                            ninjaItem["chaosValue"],
+                            1,
+                            ninjaItem["chaosValue"],
+                            poeTabNameMap[item["inventoryId"]]
+                        ]
+                    )
+                    break
+
+        # Gems get skipped
+        elif item["frameType"] == 4:
+            continue
+
+        # everything stackable
+        elif 5 <= item["frameType"] <= 6:
+            if "stackSize" in item:
+                for ninjaItem in ninjaData:
+                    itemReferenceName = "name" if "name" in ninjaItem else "currencyTypeName"
+                    chaosReferenceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                    if item["typeLine"] == ninjaItem[itemReferenceName]:
+                        csvData.append(
+                            [
+                                item["typeLine"],
+                                round(ninjaItem[chaosReferenceName] * item["stackSize"], 2),
+                                item["stackSize"],
+                                ninjaItem[chaosReferenceName],
+                                poeTabNameMap[item["inventoryId"]]
+                            ]
+                        )
+                        break
+
+        # Watchstones get skipped
+        elif item["frameType"] == 7:
+            continue
+
+        # Prophecies
+        elif item["frameType"] == 8:
+            for ninjaItem in ninjaData:
+                if "name" in ninjaItem \
+                        and item["typeLine"] == ninjaItem["name"]:
+                    csvData.append(
+                        [
+                            item["typeLine"],
+                            ninjaItem["chaosValue"],
+                            1,
+                            ninjaItem["chaosValue"],
+                            poeTabNameMap[item["inventoryId"]]
+                        ]
+                    )
+                    break
+
+        # Relics
+        elif item["frameType"] == 9:
+            for ninjaItem in ninjaData:
+                if "name" in ninjaItem \
+                        and item["name"] == ninjaItem["name"] \
+                        and ninjaItem["links"] == 0 \
+                        and ninjaItem["itemClass"] == 9 \
+                        and check_links(item) == ninjaItem["links"]:
+                    csvData.append(
+                        [
+                            item["name"],
+                            ninjaItem["chaosValue"],
+                            1,
+                            ninjaItem["chaosValue"],
+                            poeTabNameMap[item["inventoryId"]]
+                        ]
+                    )
+                    break
+    return csvData
 
 
 def print_valid_leagues():
@@ -205,7 +326,6 @@ def print_valid_leagues():
 
 
 if __name__ == "__main__":
-    cookie = {"POESESSID": poessid}
     ts1 = time.time()
 
     if league == "?":
@@ -215,7 +335,7 @@ if __name__ == "__main__":
 
     if league == "set me!" or \
             accountName == "set me!" or \
-            cookie["POESESSID"] == "set me!":
+            poesessid == "set me!":
         print("please enter your data at the start of this file")
         input("press enter to quit")
         quit(1)
@@ -226,29 +346,21 @@ if __name__ == "__main__":
     print("downloading")
 
     ninjaData = ninja_get_data(league)
-    poeData = poe_get_data(accountName, league, cookie)
+    poeData = poe_get_data(accountName, league, poesessid)
 
     print("finished downloads, comparing now")
 
-    csvData = []
-    for item in poeData:
-        try:
-            if ninjaData[item[0]] * item[2] >= minimumChaosValue:
-                csvData.append([
-                    item[0],                                 # item name
-                    round(ninjaData[item[0]] * item[2], 2),  # the stacks total worth
-                    item[2],                                 # how many of this is stacked
-                    ninjaData[item[0]],                      # worth of each individual item
-                    item[1],                                 # the StashTab that it is in
-                    ])
-        except KeyError:
-            pass
+    csvData = compare_poe_with_ninja_data(poeData, ninjaData)
+
+    # culling items that are not worth enough
+    csvData = [row for row in csvData if row[1] > minimumChaosValue]
 
     if sortByUnitPrice:
         csvData.sort(key=lambda x: x[3])
     else:
         csvData.sort(key=lambda x: x[1])
     csvData.reverse()
+
     csvData.insert(0, ["total",    0.0,              "",          "",                 ""])
     csvData.insert(0, ["itemName", "value in chaos", "stackSize", "individual value", "tabName"])
     for i in range(2, len(csvData)):
