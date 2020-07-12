@@ -43,24 +43,25 @@ def ninja_get_data(league):
     baseURL = "https://poe.ninja/api/data/{}Overview?league={}&type={}"
     ninjaCurrencyTypes = ["Fragment", "Currency"]
     ninjaTypes = [
-        "Fossil",
-        "Resonator",
-        "Scarab",
-        "Essence",
+        "DeliriumOrb",
         "DivinationCard",
+        "Essence",
+        "Fossil",
+        "Incubator",
+        "Map",
+        "Oil",
         "Prophecy",
-        "UniqueJewel",
-        "UniqueWeapon",
-        "UniqueArmour",
+        "Resonator",
+        "Seed",
+        "Scarab",
         "UniqueAccessory",
+        "UniqueArmour",
         "UniqueFlask",
         "UniqueJewel",
-        "DeliriumOrb",
-        "Incubator",
+        "UniqueJewel",
         "UniqueMap",
-        "Map",
+        "UniqueWeapon",
         "Vial",
-        "Oil"
     ]
 
     urls_to_download = []
@@ -186,41 +187,23 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
 
     csvData = []
     for item in poeData:
-        # Map Fragments and Maps (non maps get filtered)
+        # Map Fragments and Maps (non map items get filtered)
         if 0 <= item["frameType"] <= 2:
-            # stackable Map Fragments
             for ninjaItem in ninjaData:
-                if "stackSize" in item \
-                        or ("descrText" in item and "Map Device" in item["descrText"]):
-                    if "currencyTypeName" in ninjaItem \
-                            and item["typeLine"] == ninjaItem["currencyTypeName"]:
-                        amount = item["stackSize"] if "stackSize" in item else 1
-                        csvData.append(
-                            [
-                                item["typeLine"],
-                                round(ninjaItem["chaosEquivalent"] * amount, 2),
-                                amount,
-                                ninjaItem["chaosEquivalent"],
-                                poeTabNameMap[item["inventoryId"]]
-                            ]
-                        )
-                        break
-                # Map Fragments and Maps basetypes
-                elif "properties" in item \
-                        and "name" in item["properties"] \
-                        and item["properties"]["name"] == "Map Tier":
-                    if "name" in ninjaItem \
-                            and item["typeLine"] == ninjaItem["name"]:
-                        csvData.append(
-                            [
-                                item["typeLine"],
-                                ninjaItem["chaosValue"],
-                                1,
-                                ninjaItem["chaosValue"],
-                                poeTabNameMap[item["inventoryId"]]
-                            ]
-                        )
-                        break
+                referenceAmount = item["stackSize"] if "stackSize" in item else 1
+                referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
+                referencePriceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
+                    csvData.append(
+                        [
+                            item["typeLine"],
+                            round(ninjaItem[referencePriceName] * referenceAmount, 2),
+                            referenceAmount,
+                            ninjaItem[referencePriceName],
+                            poeTabNameMap[item["inventoryId"]]
+                        ]
+                    )
+                    break
 
         # Unique items
         elif item["frameType"] == 3:
@@ -247,21 +230,21 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
 
         # everything stackable
         elif 5 <= item["frameType"] <= 6:
-            if "stackSize" in item:
-                for ninjaItem in ninjaData:
-                    itemReferenceName = "name" if "name" in ninjaItem else "currencyTypeName"
-                    chaosReferenceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
-                    if item["typeLine"] == ninjaItem[itemReferenceName]:
-                        csvData.append(
-                            [
-                                item["typeLine"],
-                                round(ninjaItem[chaosReferenceName] * item["stackSize"], 2),
-                                item["stackSize"],
-                                ninjaItem[chaosReferenceName],
-                                poeTabNameMap[item["inventoryId"]]
-                            ]
-                        )
-                        break
+            for ninjaItem in ninjaData:
+                referenceAmount = item["stackSize"] if "stackSize" in item else 1
+                referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
+                referencePriceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
+                    csvData.append(
+                        [
+                            item["typeLine"],
+                            round(ninjaItem[referencePriceName] * referenceAmount, 2),
+                            referenceAmount,
+                            ninjaItem[referencePriceName],
+                            poeTabNameMap[item["inventoryId"]]
+                        ]
+                    )
+                    break
 
         # Watchstones get skipped
         elif item["frameType"] == 7:
