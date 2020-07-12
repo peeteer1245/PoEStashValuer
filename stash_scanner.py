@@ -225,8 +225,11 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
         # everything stackable
         elif 5 <= item["frameType"] <= 6:
             # non seeds
-            if "Sacred Grove" not in item["descrText"] \
-                    or "to place it." in item["descrText"]:
+            if "descrText" not in item \
+                    or (
+                        "Sacred Grove" not in item["descrText"]
+                        or "to place it." in item["descrText"]
+                    ):
                 for ninjaItem in ninjaData:
                     referenceAmount = item["stackSize"] if "stackSize" in item else 1
                     referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
@@ -253,7 +256,8 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
                         monsterLevel = int(itemProperty["values"][0][0])
 
                 for ninjaItem in ninjaData:
-                    if item["typeLine"] == ninjaItem["name"] \
+                    if "name" in ninjaItem \
+                            and item["typeLine"] == ninjaItem["name"] \
                             and seedTier == ninjaItem["mapTier"] \
                             and monsterLevel >= ninjaItem["levelRequired"]:
                         matches.append(ninjaItem)
