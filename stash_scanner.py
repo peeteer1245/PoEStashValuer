@@ -92,14 +92,8 @@ def poe_stash_downloader(infoList):
 def poe_get_data(userName, league, poesessid):
     baseURL = "https://www.pathofexile.com/character-window/get-stash-items?league={}&accountName={}&tabs={}"
     addinURL = "&tabIndex="
-    stashTabWhiteList = [
-        "DivinationCardStash",
-        "PremiumStash",
-        "QuadStash",
-        "NormalStash",
-        "CurrencyStash",
-        "FragmentStash",
-        "EssenceStash"
+    stashTabBlackList = [
+        "MapStash",
     ]
 
     cookie = {"POESESSID": poesessid}
@@ -111,7 +105,7 @@ def poe_get_data(userName, league, poesessid):
 
     toDownload = []
     for stashTab in probe.json()["tabs"]:
-        if stashTab["type"] in stashTabWhiteList:
+        if stashTab["type"] not in stashTabBlackList:
             toAppend = []
             toAppend.append(stashTab["n"])     # Name
             toAppend.append(stashTab["i"])     # Index Number

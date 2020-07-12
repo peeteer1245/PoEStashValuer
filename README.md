@@ -30,10 +30,6 @@ Compares your stash contents with items on poe.ninja to give a rough estimate, a
 - Maps inside a Map Stash Tab cannot be included
 
 ## TODO
-- support all stash tabs
-  - map (GGG needs to implement this)
-  - delve (it probably works but it's not whitelisted)
-
 - support all poe.ninja types
   - `SkillGem`
   - `BaseType`
