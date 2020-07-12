@@ -230,21 +230,59 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
 
         # everything stackable
         elif 5 <= item["frameType"] <= 6:
-            for ninjaItem in ninjaData:
-                referenceAmount = item["stackSize"] if "stackSize" in item else 1
-                referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
-                referencePriceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
-                if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
-                    csvData.append(
-                        [
-                            item["typeLine"],
-                            round(ninjaItem[referencePriceName] * referenceAmount, 2),
-                            referenceAmount,
-                            ninjaItem[referencePriceName],
-                            poeTabNameMap[item["inventoryId"]]
-                        ]
-                    )
-                    break
+            # non seeds
+            if "Sacred Grove" not in item["descrText"] \
+                    or "to place it." in item["descrText"]:
+                for ninjaItem in ninjaData:
+                    referenceAmount = item["stackSize"] if "stackSize" in item else 1
+                    referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
+                    referencePriceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                    if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
+                        csvData.append(
+                            [
+                                item["typeLine"],
+                                round(ninjaItem[referencePriceName] * referenceAmount, 2),
+                                referenceAmount,
+                                ninjaItem[referencePriceName],
+                                poeTabNameMap[item["inventoryId"]]
+                            ]
+                        )
+                        break
+            else:
+                matches = []
+                seedTier = 0
+                monsterLevel = 0
+                for itemProperty in item["properties"]:
+                    if itemProperty["name"] == "Seed Tier":
+                        seedTier = int(itemProperty["values"][0][0])
+                    if itemProperty["name"] == "Spawns a Level %0 Monster when Harvested":
+                        monsterLevel = int(itemProperty["values"][0][0])
+
+                for ninjaItem in ninjaData:
+                    if item["typeLine"] == ninjaItem["name"] \
+                            and seedTier == ninjaItem["mapTier"] \
+                            and monsterLevel >= ninjaItem["levelRequired"]:
+                        matches.append(ninjaItem)
+
+                if len(matches) == 0:
+                    continue
+                else:
+                    bestMatch = matches[0]
+
+                for match in matches:
+                    if match["chaosValue"] > bestMatch["chaosValue"]:
+                        bestMatch = match
+
+                csvData.append(
+                    [
+                        item["typeLine"],
+                        round(bestMatch["chaosValue"] * item["stackSize"], 2),
+                        item["stackSize"],
+                        bestMatch["chaosValue"],
+                        poeTabNameMap[item["inventoryId"]]
+                    ]
+                )
+                break
 
         # Watchstones get skipped
         elif item["frameType"] == 7:
