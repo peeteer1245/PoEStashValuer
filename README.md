@@ -14,7 +14,6 @@ Compares your stash contents with items on poe.ninja to give a rough estimate, a
 `Prophecy`
 `Resonator`
 `Scarab`
-`Seed`
 `UniqueAccessory`
 `UniqueArmour`
 `UniqueFlask`

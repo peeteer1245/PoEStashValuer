@@ -52,7 +52,6 @@ def ninja_get_data(league):
         "Oil",
         "Prophecy",
         "Resonator",
-        "Seed",
         "Scarab",
         "UniqueAccessory",
         "UniqueArmour",
