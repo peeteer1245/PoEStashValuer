@@ -4,15 +4,15 @@
 ##############################################################################################################
 # Set your personal preferences here.
 writeFile = False
-fileName = "chaos_report.csv"  # <------------------------------------------------- maybe change this
+fileName = "chaos_report.csv"  # <------------------- maybe change this
 
-minimumChaosValue = 2  # <--------------------------------------------------------- maybe change this
+minimumChaosValue = 2  # <--------------------------- maybe change this
 
-sortByUnitPrice = False  # <------------------------------------------------------- maybe change this
+sortByUnitPrice = False  # <------------------------- maybe change this
 
-league = "set me!"  # <------------------------------------------------------------ change this
-accountName = "set me!"  # <------------------------------------------------------- change this
-poesessid = "set me!"  # <--------------------------------------------------------- change this
+league = "set me!"  # <------------------------------ change this
+accountName = "set me!"  # <------------------------- change this
+poesessid = "set me!"  # <--------------------------- change this
 # you can check the link below, if you don't know where to get the poesessid
 # https://github.com/Stickymaddness/Procurement/wiki/SessionID
 
@@ -110,8 +110,8 @@ def poe_get_data(userName, league, poesessid):
     for stashTab in probe.json()["tabs"]:
         if stashTab["type"] not in stashTabBlackList:
             toAppend = []
-            toAppend.append(stashTab["n"])     # Name
-            toAppend.append(stashTab["i"])     # Index Number
+            toAppend.append(stashTab["n"])  # Name
+            toAppend.append(stashTab["i"])  # Index Number
             toAppend.append(stashTab["type"])  # Stash Type
             toDownload.append(toAppend)
 
@@ -135,8 +135,14 @@ def poe_get_data(userName, league, poesessid):
                 tabsToDownloadCounter = len(toDownload) - downloadadTabsCounter  #
 
             tabsForThePool = []  # TODO: think of better names
-            for i in range(downloadadTabsCounter, downloadadTabsCounter + tabsToDownloadCounter):
-                url = baseURL.format(league, userName, 0) + addinURL + str(toDownload[i][1])
+            for i in range(
+                downloadadTabsCounter, downloadadTabsCounter + tabsToDownloadCounter
+            ):
+                url = (
+                    baseURL.format(league, userName, 0)
+                    + addinURL
+                    + str(toDownload[i][1])
+                )
                 tabsForThePool.append([url, cookie])
 
             for items in pool.imap_unordered(poe_stash_downloader, tabsForThePool):
@@ -154,8 +160,7 @@ def poe_get_data(userName, league, poesessid):
 
 
 def check_links(item):
-    if "sockets" in item \
-            and len(item["sockets"]) > 4:
+    if "sockets" in item and len(item["sockets"]) > 4:
         largestLink = 1
         linkCounter = 1
         lastSocketGroup = 0
@@ -180,7 +185,7 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
     # creating a map to ease the process of getting the proper name of a stashtab
     poeTabNameMap = {}
     for tab in poeTabInfos:
-        poeTabNameMap["Stash" + str(tab["i"]+1)] = tab["n"]
+        poeTabNameMap["Stash" + str(tab["i"] + 1)] = tab["n"]
 
     csvData = []
     for item in poeData:
@@ -188,8 +193,12 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
         if 0 <= item["frameType"] <= 2:
             for ninjaItem in ninjaData:
                 referenceAmount = item["stackSize"] if "stackSize" in item else 1
-                referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
-                referencePriceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                referenceNinjaItemName = (
+                    "name" if "name" in ninjaItem else "currencyTypeName"
+                )
+                referencePriceName = (
+                    "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                )
                 if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
                     csvData.append(
                         [
@@ -197,7 +206,7 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
                             round(ninjaItem[referencePriceName] * referenceAmount, 2),
                             referenceAmount,
                             ninjaItem[referencePriceName],
-                            poeTabNameMap[item["inventoryId"]]
+                            poeTabNameMap[item["inventoryId"]],
                         ]
                     )
                     break
@@ -205,18 +214,20 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
         # Unique items
         elif item["frameType"] == 3:
             for ninjaItem in ninjaData:
-                if "name" in ninjaItem \
-                        and item["name"] == ninjaItem["name"] \
-                        and item["typeLine"] == ninjaItem["baseType"] \
-                        and ninjaItem["itemClass"] == 3 \
-                        and check_links(item) == ninjaItem["links"]:
+                if (
+                    "name" in ninjaItem
+                    and item["name"] == ninjaItem["name"]
+                    and item["typeLine"] == ninjaItem["baseType"]
+                    and ninjaItem["itemClass"] == 3
+                    and check_links(item) == ninjaItem["links"]
+                ):
                     csvData.append(
                         [
                             item["name"],
                             ninjaItem["chaosValue"],
                             1,
                             ninjaItem["chaosValue"],
-                            poeTabNameMap[item["inventoryId"]]
+                            poeTabNameMap[item["inventoryId"]],
                         ]
                     )
                     break
@@ -228,23 +239,28 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
         # everything stackable
         elif 5 <= item["frameType"] <= 6:
             # non seeds
-            if "descrText" not in item \
-                    or (
-                        "Sacred Grove" not in item["descrText"]
-                        or "to place it." in item["descrText"]
-                    ):
+            if "descrText" not in item or (
+                "Sacred Grove" not in item["descrText"]
+                or "to place it." in item["descrText"]
+            ):
                 for ninjaItem in ninjaData:
                     referenceAmount = item["stackSize"] if "stackSize" in item else 1
-                    referenceNinjaItemName = "name" if "name" in ninjaItem else "currencyTypeName"
-                    referencePriceName = "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                    referenceNinjaItemName = (
+                        "name" if "name" in ninjaItem else "currencyTypeName"
+                    )
+                    referencePriceName = (
+                        "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
+                    )
                     if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
                         csvData.append(
                             [
                                 item["typeLine"],
-                                round(ninjaItem[referencePriceName] * referenceAmount, 2),
+                                round(
+                                    ninjaItem[referencePriceName] * referenceAmount, 2
+                                ),
                                 referenceAmount,
                                 ninjaItem[referencePriceName],
-                                poeTabNameMap[item["inventoryId"]]
+                                poeTabNameMap[item["inventoryId"]],
                             ]
                         )
                         break
@@ -255,14 +271,19 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
                 for itemProperty in item["properties"]:
                     if itemProperty["name"] == "Seed Tier":
                         seedTier = int(itemProperty["values"][0][0])
-                    if itemProperty["name"] == "Spawns a Level %0 Monster when Harvested":
+                    if (
+                        itemProperty["name"]
+                        == "Spawns a Level %0 Monster when Harvested"
+                    ):
                         monsterLevel = int(itemProperty["values"][0][0])
 
                 for ninjaItem in ninjaData:
-                    if "name" in ninjaItem \
-                            and item["typeLine"] == ninjaItem["name"] \
-                            and seedTier == ninjaItem["mapTier"] \
-                            and monsterLevel >= ninjaItem["levelRequired"]:
+                    if (
+                        "name" in ninjaItem
+                        and item["typeLine"] == ninjaItem["name"]
+                        and seedTier == ninjaItem["mapTier"]
+                        and monsterLevel >= ninjaItem["levelRequired"]
+                    ):
                         matches.append(ninjaItem)
 
                 if len(matches) == 0:
@@ -280,7 +301,7 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
                         round(bestMatch["chaosValue"] * item["stackSize"], 2),
                         item["stackSize"],
                         bestMatch["chaosValue"],
-                        poeTabNameMap[item["inventoryId"]]
+                        poeTabNameMap[item["inventoryId"]],
                     ]
                 )
                 break
@@ -292,15 +313,14 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
         # Prophecies
         elif item["frameType"] == 8:
             for ninjaItem in ninjaData:
-                if "name" in ninjaItem \
-                        and item["typeLine"] == ninjaItem["name"]:
+                if "name" in ninjaItem and item["typeLine"] == ninjaItem["name"]:
                     csvData.append(
                         [
                             item["typeLine"],
                             ninjaItem["chaosValue"],
                             1,
                             ninjaItem["chaosValue"],
-                            poeTabNameMap[item["inventoryId"]]
+                            poeTabNameMap[item["inventoryId"]],
                         ]
                     )
                     break
@@ -308,18 +328,20 @@ def compare_poe_with_ninja_data(poeData, ninjaData):
         # Relics
         elif item["frameType"] == 9:
             for ninjaItem in ninjaData:
-                if "name" in ninjaItem \
-                        and item["name"] == ninjaItem["name"] \
-                        and ninjaItem["links"] == 0 \
-                        and ninjaItem["itemClass"] == 9 \
-                        and check_links(item) == ninjaItem["links"]:
+                if (
+                    "name" in ninjaItem
+                    and item["name"] == ninjaItem["name"]
+                    and ninjaItem["links"] == 0
+                    and ninjaItem["itemClass"] == 9
+                    and check_links(item) == ninjaItem["links"]
+                ):
                     csvData.append(
                         [
                             item["name"],
                             ninjaItem["chaosValue"],
                             1,
                             ninjaItem["chaosValue"],
-                            poeTabNameMap[item["inventoryId"]]
+                            poeTabNameMap[item["inventoryId"]],
                         ]
                     )
                     break
@@ -355,9 +377,7 @@ if __name__ == "__main__":
         input("press enter to quit")
         quit(0)
 
-    if league == "set me!" or \
-            accountName == "set me!" or \
-            poesessid == "set me!":
+    if league == "set me!" or accountName == "set me!" or poesessid == "set me!":
         print("please enter your data at the start of this file")
         input("press enter to quit")
         quit(1)
@@ -383,8 +403,10 @@ if __name__ == "__main__":
         csvData.sort(key=lambda x: x[1])
     csvData.reverse()
 
-    csvData.insert(0, ["total",    0.0,              "",          "",                 ""])
-    csvData.insert(0, ["itemName", "value in chaos", "stackSize", "individual value", "tabName"])
+    csvData.insert(0, ["total", 0.0, "", "", ""])
+    csvData.insert(
+        0, ["itemName", "value in chaos", "stackSize", "individual value", "tabName"]
+    )
     for i in range(2, len(csvData)):
         csvData[1][1] += csvData[i][1]  # calculating total value
     csvData[1][1] = round(csvData[1][1], 2)  # rounding total value to 2 decimal points
@@ -393,7 +415,11 @@ if __name__ == "__main__":
     if writeFile:
         with open(fileName, "w") as fileOut:
             for line in csvData:
-                fileOut.write("\"{0}\";\"{1}\";\"{2}\";\"{3}\";\"{4}\"\n".format(line[0], line[1], line[2], line[3], line[4]))
+                fileOut.write(
+                    '"{0}";"{1}";"{2}";"{3}";"{4}"\n'.format(
+                        line[0], line[1], line[2], line[3], line[4]
+                    )
+                )
             fileOut.close()
 
     # printing the csv table to the terminal
@@ -408,7 +434,10 @@ if __name__ == "__main__":
     print()
     for row in csvData:
         for i in range(5):
-            print("{0:{width}}".format(str(row[i]), width=longest_column_length[i]), end="")
+            print(
+                "{0:{width}}".format(str(row[i]), width=longest_column_length[i]),
+                end="",
+            )
         print()
 
     print()
