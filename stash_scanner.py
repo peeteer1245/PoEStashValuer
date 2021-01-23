@@ -407,8 +407,14 @@ if __name__ == "__main__":
     print("downloading")
 
     ninjaData = ninja_get_data(league)
-    poeData = poe_get_data(accountName, league, poesessid)
-
+    while True:
+        try:
+            poeData = poe_get_data(accountName, league, poesessid)
+            break
+        except requests.exceptions.HTTPError as e:
+            print("pathofexile.com: too many requests")
+            print("waiting for 1 minute")
+            time.sleep(60)
     print("finished downloads, comparing now")
 
     csvData = compare_poe_with_ninja_data(poeData, ninjaData)
