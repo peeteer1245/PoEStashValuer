@@ -178,6 +178,13 @@ def count_item_links(item: dic) -> int:
         return 0
 
 
+def item_is_map(item: dic) -> bool:
+    for property in item["properties"]:
+        if property["name"] == "Map Tier":
+            return True
+    return False
+
+
 def compare_poe_with_ninja_data(poeData: list, ninjaData: list) -> list:
     poeTabInfos = poeData[0]
     poeData.pop(0)
@@ -191,15 +198,26 @@ def compare_poe_with_ninja_data(poeData: list, ninjaData: list) -> list:
     for item in poeData:
         # Map Fragments and Maps (non map items get filtered)
         if 0 <= item["frameType"] <= 2:
+            referenceAmount = item["stackSize"] if "stackSize" in item else 1
             for ninjaItem in ninjaData:
-                referenceAmount = item["stackSize"] if "stackSize" in item else 1
                 referenceNinjaItemName = (
                     "name" if "name" in ninjaItem else "currencyTypeName"
                 )
                 referencePriceName = (
                     "chaosValue" if "chaosValue" in ninjaItem else "chaosEquivalent"
                 )
-                if item["typeLine"] == ninjaItem[referenceNinjaItemName]:
+                if item["typeLine"] in ninjaItem[referenceNinjaItemName]:
+                    if item_is_map(item):
+                        # getting the map tier
+                        map_tier = 0
+                        for property in item["properties"]:
+                            if property["name"] == "Map Tier":
+                                try:
+                                    map_tier = int(property["values"][0][0])
+                                except ValueError as e:
+                                    raise e
+                        if map_tier != ninjaItem["mapTier"]:
+                            continue
                     csvData.append(
                         [
                             item["typeLine"],
