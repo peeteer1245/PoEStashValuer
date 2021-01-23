@@ -37,13 +37,13 @@ except ImportError:
     quit()
 
 
-def json_downloader(url):
+def json_downloader(url: str) -> dic:
     r = requests.get(url, headers=headers)
     r.raise_for_status()
     return r.json()
 
 
-def ninja_get_data(league):
+def ninja_get_data(league: str) -> list:
     baseURL = "https://poe.ninja/api/data/{}Overview?league={}&type={}"
     ninjaCurrencyTypes = ["Fragment", "Currency"]
     ninjaTypes = [
@@ -81,7 +81,7 @@ def ninja_get_data(league):
     return dataCollection
 
 
-def poe_stash_downloader(infoList):
+def poe_stash_downloader(infoList: list) -> list:
     url = infoList[0]
     cookie = infoList[1]
 
@@ -92,7 +92,7 @@ def poe_stash_downloader(infoList):
     return r.json()["items"]
 
 
-def poe_get_data(userName, league, poesessid):
+def poe_get_data(userName: str, league: str, poesessid: str) -> list:
     baseURL = "https://www.pathofexile.com/character-window/get-stash-items?league={}&accountName={}&tabs={}"
     addinURL = "&tabIndex="
     stashTabBlackList = [
@@ -159,7 +159,7 @@ def poe_get_data(userName, league, poesessid):
     return dataList
 
 
-def check_links(item):
+def count_item_links(item: dic) -> int:
     if "sockets" in item and len(item["sockets"]) > 4:
         largestLink = 1
         linkCounter = 1
@@ -178,7 +178,7 @@ def check_links(item):
         return 0
 
 
-def compare_poe_with_ninja_data(poeData, ninjaData):
+def compare_poe_with_ninja_data(poeData: list, ninjaData: list) -> list:
     poeTabInfos = poeData[0]
     poeData.pop(0)
 
