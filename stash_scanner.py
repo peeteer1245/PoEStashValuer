@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-##############################################################################################################
+########################################################################################
 # Set your personal preferences here.
 writeFile = False
 fileName = "chaos_report.csv"  # <------------------- maybe change this
@@ -17,7 +17,7 @@ poesessid = "set me!"  # <--------------------------- change this
 # https://github.com/Stickymaddness/Procurement/wiki/SessionID
 
 # enter a "?" in league, and execute the script, if you want a list of all valid leagues
-##############################################################################################################
+########################################################################################
 
 ### start of code ###
 
