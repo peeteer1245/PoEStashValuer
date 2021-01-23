@@ -21,6 +21,10 @@ poesessid = "set me!"  # <------------------------------------------------------
 
 ### start of code ###
 
+headers = {
+    "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)",
+}
+
 
 import multiprocessing
 import os
@@ -34,7 +38,7 @@ except ImportError:
 
 
 def json_downloader(url):
-    r = requests.get(url)
+    r = requests.get(url, headers=headers)
     r.raise_for_status()
     return r.json()
 
@@ -81,7 +85,7 @@ def poe_stash_downloader(infoList):
     url = infoList[0]
     cookie = infoList[1]
 
-    r = requests.get(url, cookies=cookie)
+    r = requests.get(url, cookies=cookie, headers=headers)
 
     r.raise_for_status()
 
@@ -99,7 +103,7 @@ def poe_get_data(userName, league, poesessid):
 
     probeURL = baseURL.format(league, userName, 1)
 
-    probe = requests.get(probeURL, cookies=cookie)
+    probe = requests.get(probeURL, cookies=cookie, headers=headers)
     probe.raise_for_status()
 
     toDownload = []
@@ -330,12 +334,12 @@ def print_valid_leagues():
     poeApi = "http://api.pathofexile.com/leagues"
     ninjaApi = "https://poe.ninja/api/data/ItemOverview?league={}&type=Fossil"
 
-    poeApiResponse = requests.get(poeApi)
+    poeApiResponse = requests.get(poeApi, headers=headers)
     poeLeagues = [league["id"] for league in poeApiResponse.json()]
 
     matches = []
     for leagueName in poeLeagues:
-        ninjaResponse = requests.get(ninjaApi.format(leagueName))
+        ninjaResponse = requests.get(ninjaApi.format(leagueName), headers=headers)
         if ninjaResponse.status_code == 200:
             matches.append(leagueName)
 
