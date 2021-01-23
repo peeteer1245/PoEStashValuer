@@ -219,7 +219,7 @@ def compare_poe_with_ninja_data(poeData: list, ninjaData: list) -> list:
                     and item["name"] == ninjaItem["name"]
                     and item["typeLine"] == ninjaItem["baseType"]
                     and ninjaItem["itemClass"] == 3
-                    and check_links(item) == ninjaItem["links"]
+                    and count_item_links(item) == ninjaItem["links"]
                 ):
                     csvData.append(
                         [
@@ -333,7 +333,7 @@ def compare_poe_with_ninja_data(poeData: list, ninjaData: list) -> list:
                     and item["name"] == ninjaItem["name"]
                     and ninjaItem["links"] == 0
                     and ninjaItem["itemClass"] == 9
-                    and check_links(item) == ninjaItem["links"]
+                    and count_item_links(item) == ninjaItem["links"]
                 ):
                     csvData.append(
                         [
