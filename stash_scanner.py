@@ -178,10 +178,11 @@ def count_item_links(item: dict) -> int:
         return 0
 
 
-def item_is_map(item: dic) -> bool:
-    for property in item["properties"]:
-        if property["name"] == "Map Tier":
-            return True
+def item_is_map(item: dict) -> bool:
+    if "properties" in item:
+        for property in item["properties"]:
+            if property["name"] == "Map Tier":
+                return True
     return False
 
 
