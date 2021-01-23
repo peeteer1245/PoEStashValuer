@@ -37,7 +37,7 @@ except ImportError:
     quit()
 
 
-def json_downloader(url: str) -> dic:
+def json_downloader(url: str) -> dict:
     r = requests.get(url, headers=headers)
     r.raise_for_status()
     return r.json()
@@ -159,7 +159,7 @@ def poe_get_data(userName: str, league: str, poesessid: str) -> list:
     return dataList
 
 
-def count_item_links(item: dic) -> int:
+def count_item_links(item: dict) -> int:
     if "sockets" in item and len(item["sockets"]) > 4:
         largestLink = 1
         linkCounter = 1
