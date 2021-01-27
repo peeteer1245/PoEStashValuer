@@ -23,7 +23,7 @@ poesessid = "set me!"  # <--------------------------- change this
 
 # due to a different tool DDoS-ing GGG we need to identify ourselves
 # https://www.pathofexile.com/forum/view-thread/3019033/page/1#p23790007
-HEADERS = {
+headers = {
     "User-Agent": "https://github.com/peeteer1245/PoEStashValuer",
 }
 
