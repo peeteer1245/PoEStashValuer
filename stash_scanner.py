@@ -21,8 +21,10 @@ poesessid = "set me!"  # <--------------------------- change this
 
 ### start of code ###
 
-headers = {
-    "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.0; Windows 98; DigExt)",
+# due to a different tool DDoS-ing GGG we need to identify ourselves
+# https://www.pathofexile.com/forum/view-thread/3019033/page/1#p23790007
+HEADERS = {
+    "User-Agent": "https://github.com/peeteer1245/PoEStashValuer",
 }
 
 
