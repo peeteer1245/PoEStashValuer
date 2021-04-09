@@ -23,13 +23,13 @@ Compares your stash contents with items on poe.ninja to give a rough estimate, a
 `UniqueWeapon`
 `Vial`
 
-## What cannot be included in the summary?
+## What will not be included in the summary?
 - 5/6 Link items will not be included (except uniques)
-- Magic Maps will not be included
 - Maps inside a Map Stash Tab cannot be included
+- see TODO section
 
 ## TODO
-- support all poe.ninja types
+- support everything that poe.ninja can provide
   - `SkillGem`
   - `BaseType`
   - `Watchstone`
