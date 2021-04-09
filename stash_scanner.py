@@ -378,13 +378,21 @@ def print_valid_leagues():
     ninjaApi = "https://poe.ninja/api/data/ItemOverview?league={}&type=Fossil"
 
     poeApiResponse = requests.get(poeApi, headers=headers)
-    poeLeagues = [league["id"] for league in poeApiResponse.json()]
 
     matches = []
-    for leagueName in poeLeagues:
-        ninjaResponse = requests.get(ninjaApi.format(leagueName), headers=headers)
+    for league in poeApiResponse.json():
+        # skip ssf leagues
+        skip_league = False
+        for rule in league["rules"]:
+            if rule["name"] == "Solo":
+                skip_league = True
+                break
+        if skip_league:
+            break
+
+        ninjaResponse = requests.get(ninjaApi.format(league["id"]), headers=headers)
         if ninjaResponse.status_code == 200:
-            matches.append(leagueName)
+            matches.append(league["id"])
 
     print("The following leagues are valid:")
     [print(match) for match in matches]
