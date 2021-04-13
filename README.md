@@ -1,3 +1,8 @@
+# DO NOT USE THIS
+Recent changes to the Terms of Service forbid the usage of the API that is used here.  
+Everything still works but it may get you banned.  
+This project is discontinued and abandoned.
+
 # PoEStashValuer
 Compares your stash contents with items on poe.ninja to give a rough estimate, and recommendation for manual research.
 
